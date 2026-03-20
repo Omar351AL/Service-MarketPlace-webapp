@@ -1,0 +1,54 @@
+name: Deploy Marketplace
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            cd /root/MyProjects/MarketPlaceService
+
+            echo "📥 Pulling latest changes..."
+            git pull origin main
+
+            echo "📦 Installing dependencies..."
+            npm install --include=optional
+
+            echo "🧠 Prisma generate..."
+            npm run db:generate
+
+            echo "🚀 Applying migrations..."
+            cd server
+            npx prisma migrate deploy
+
+            echo "🌱 Seeding..."
+            npm run db:seed
+
+            cd ..
+
+            echo "🏗 Building frontend..."
+            npm run build
+
+            echo "📁 Deploying frontend..."
+            rm -rf /var/www/marketplace-service/*
+            cp -r client/dist/* /var/www/marketplace-service/
+
+            echo "🔄 Restarting backend..."
+            pm2 restart marketplace-backend --update-env
+
+            echo "🔁 Reload nginx..."
+            systemctl reload nginx
+
+            echo "✅ Deployment done!"
