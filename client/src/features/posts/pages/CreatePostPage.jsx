@@ -24,6 +24,8 @@ export const CreatePostPage = () => {
   const [actionMessage, setActionMessage] = useState('');
   const [postPendingDelete, setPostPendingDelete] = useState(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState(null);
+  const [submitProgressLabel, setSubmitProgressLabel] = useState('');
 
   const loadData = async () => {
     try {
@@ -106,6 +108,8 @@ export const CreatePostPage = () => {
               setActionMessage('');
               setErrorMessage('');
               setFieldErrors({});
+              setSubmitProgress(null);
+              setSubmitProgressLabel('');
             }}
           >
             <PlusSquare size={18} />
@@ -128,16 +132,38 @@ export const CreatePostPage = () => {
             categories={categories}
             submitLabel={t('posts.addNewListing')}
             isSubmitting={isSubmitting}
+            submitProgress={submitProgress}
+            submitProgressLabel={submitProgressLabel}
             errorMessage={errorMessage}
             fieldErrors={fieldErrors}
             onSubmit={async (payload) => {
+              const hasImages = payload.getAll('images').length > 0;
+
               setIsSubmitting(true);
               setErrorMessage('');
               setFieldErrors({});
               setActionMessage('');
+              setSubmitProgress(hasImages ? 0 : null);
+              setSubmitProgressLabel(hasImages ? t('posts.uploadingImages') : '');
 
               try {
-                const response = await api.createPost(payload, token);
+                const response = await api.createPost(payload, token, {
+                  timeoutMs: 120000,
+                  onUploadProgress: (progressValue) => {
+                    setSubmitProgress(progressValue);
+                    setSubmitProgressLabel(t('posts.uploadingImages'));
+                  },
+                  onUploadStageChange: (stage) => {
+                    if (!hasImages) {
+                      return;
+                    }
+
+                    if (stage === 'processing') {
+                      setSubmitProgress(100);
+                      setSubmitProgressLabel(t('posts.savingListing'));
+                    }
+                  }
+                });
                 setPosts((currentPosts) =>
                   currentPosts ? [response.data, ...currentPosts] : [response.data]
                 );
@@ -148,10 +174,16 @@ export const CreatePostPage = () => {
                 setErrorMessage(
                   Object.keys(error.fieldErrors || {}).length > 0
                     ? t('posts.fixFields')
-                    : error.message
+                    : error.code === 'UPLOAD_TIMEOUT'
+                      ? t('posts.uploadTimeoutError')
+                      : error.code === 'NETWORK_ERROR'
+                        ? t('posts.uploadNetworkError')
+                        : error.message
                 );
               } finally {
                 setIsSubmitting(false);
+                setSubmitProgress(null);
+                setSubmitProgressLabel('');
               }
             }}
           />

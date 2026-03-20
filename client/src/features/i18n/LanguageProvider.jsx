@@ -43,6 +43,7 @@ const translations = {
       optional: 'Optional',
       category: 'Category',
       country: 'Country',
+      governorate: 'Governorate',
       title: 'Title',
       description: 'Description',
       price: 'Price',
@@ -174,6 +175,10 @@ const translations = {
       myEmptyDescription: '',
       myCreateFirst: 'Create your first post',
       createSuccess: 'Listing created successfully.',
+      uploadingImages: 'Uploading images...',
+      savingListing: 'Saving listing...',
+      uploadTimeoutError: 'Image upload took too long. Please try again.',
+      uploadNetworkError: 'Unable to upload images right now. Please try again.',
       deleteSuccess: 'Listing deleted successfully.',
       confirmDelete: 'Delete "{{title}}"?',
       deleteDialogTitle: 'Are you sure you want to delete this listing?',
@@ -214,6 +219,7 @@ const translations = {
       cityPlaceholder: 'Optional',
       selectCountry: 'Select a country',
       selectCity: 'Select a city',
+      selectGovernorate: 'Select a governorate',
       selectCountryFirst: 'Select a country first',
       titleRequiredError: 'Title is required.',
       titleLengthError: 'Title must be at least 4 characters.',
@@ -225,7 +231,7 @@ const translations = {
       priceNegativeError: 'Price cannot be negative.',
       priceLargeError: 'Price is too large.',
       countryInvalidError: 'Please choose a valid country.',
-      cityLongError: 'City must be 80 characters or less.'
+      cityLongError: 'Governorate must be 80 characters or less.'
     },
     profile: {
       sellerEyebrow: 'Seller profile',
@@ -416,6 +422,7 @@ const translations = {
       optional: 'اختياري',
       category: 'القسم',
       country: 'الدولة',
+      governorate: 'المحافظة',
       title: 'العنوان',
       description: 'الوصف',
       price: 'السعر',
@@ -543,6 +550,10 @@ const translations = {
       myEmptyDescription: '',
       myCreateFirst: 'أنشئ أول إعلان',
       createSuccess: 'تم إنشاء الإعلان بنجاح.',
+      uploadingImages: 'جاري رفع الصور...',
+      savingListing: 'جاري حفظ الإعلان...',
+      uploadTimeoutError: 'استغرق رفع الصور وقتًا طويلًا. حاول مرة أخرى.',
+      uploadNetworkError: 'تعذر رفع الصور حاليًا. حاول مرة أخرى.',
       deleteSuccess: 'تم حذف الإعلان بنجاح.',
       confirmDelete: 'حذف "{{title}}"؟',
       deleteDialogTitle: 'هل تريد فعلاً حذف هذا الإعلان؟',
@@ -583,6 +594,7 @@ const translations = {
       cityPlaceholder: 'اختياري',
       selectCountry: 'اختر الدولة',
       selectCity: 'اختر المدينة',
+      selectGovernorate: 'اختر المحافظة',
       selectCountryFirst: 'اختر الدولة أولاً',
       titleRequiredError: 'العنوان مطلوب.',
       titleLengthError: 'يجب أن يكون العنوان 4 أحرف على الأقل.',
@@ -594,7 +606,7 @@ const translations = {
       priceNegativeError: 'لا يمكن أن يكون السعر سالباً.',
       priceLargeError: 'السعر كبير جداً.',
       countryInvalidError: 'يرجى اختيار دولة صحيحة.',
-      cityLongError: 'يجب ألا يزيد اسم المدينة عن 80 حرفاً.'
+      cityLongError: 'يجب ألا يزيد اسم المحافظة عن 80 حرفاً.'
     },
     profile: {
       sellerEyebrow: 'ملف البائع',

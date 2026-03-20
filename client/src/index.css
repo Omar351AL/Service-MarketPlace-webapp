@@ -1581,6 +1581,47 @@ img {
   flex-wrap: wrap;
 }
 
+.upload-progress {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-panel-soft);
+}
+
+.upload-progress__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.upload-progress__row strong {
+  color: var(--color-heading);
+}
+
+.upload-progress__row span {
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.upload-progress__track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.upload-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-strong));
+  transition: width 180ms ease;
+}
+
 .post-detail__content {
   padding: 1.4rem;
   display: grid;

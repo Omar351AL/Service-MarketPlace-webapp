@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { createClientId } from '../../../lib/utils/createClientId.js';
-import { getCityOptions, getCountryOptions, loadLocationStore } from '../../../lib/utils/locationOptions.js';
+import {
+  getCountryOptions,
+  getGovernorateOptions,
+  loadLocationStore
+} from '../../../lib/utils/locationOptions.js';
 import { getLocalizedCategoryName, getLocalizedPostStatusLabel } from '../../../lib/utils/marketplaceDisplay.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import { normalizePostPayload, validatePostPayload } from '../utils/postForm.js';
@@ -44,6 +48,8 @@ export const PostForm = ({
   onSubmit,
   submitLabel,
   isSubmitting,
+  submitProgress = null,
+  submitProgressLabel = '',
   errorMessage,
   fieldErrors = {}
 }) => {
@@ -58,7 +64,7 @@ export const PostForm = ({
     return existingCover?.key || createImageItems(initialValues?.images)[0]?.key || '';
   });
   const imageItemsRef = useRef(imageItems);
-  const shouldDisableCitySelect = !formState.country && !formState.city;
+  const shouldDisableGovernorateSelect = !formState.country && !formState.city;
 
   const resolveFieldError = (fieldName) => {
     const message = getFieldError(localFieldErrors, fieldName);
@@ -99,11 +105,20 @@ export const PostForm = ({
   useEffect(() => {
     let ignore = false;
 
-    loadLocationStore().then((store) => {
-      if (!ignore) {
-        setLocationStore(store);
-      }
-    });
+    loadLocationStore()
+      .then((store) => {
+        if (!ignore) {
+          setLocationStore(store);
+        }
+      })
+      .catch(() => {
+        if (!ignore) {
+          setLocationStore({
+            countries: [],
+            governoratesByCountry: new Map()
+          });
+        }
+      });
 
     return () => {
       ignore = true;
@@ -115,8 +130,8 @@ export const PostForm = ({
     [language, locationStore]
   );
 
-  const cityOptions = useMemo(
-    () => (locationStore ? getCityOptions(locationStore, formState.country, language) : []),
+  const governorateOptions = useMemo(
+    () => (locationStore ? getGovernorateOptions(locationStore, formState.country, language) : []),
     [formState.country, language, locationStore]
   );
 
@@ -290,22 +305,22 @@ export const PostForm = ({
         </label>
 
         <label className="field-group">
-          <span>{t('common.city')}</span>
+          <span>{t('common.governorate')}</span>
           <select
             name="city"
             value={formState.city}
             onChange={updateField}
-            disabled={shouldDisableCitySelect}
+            disabled={shouldDisableGovernorateSelect}
           >
             <option value="">
-              {formState.country ? t('form.selectCity') : t('form.selectCountryFirst')}
+              {formState.country ? t('form.selectGovernorate') : t('form.selectCountryFirst')}
             </option>
             {!formState.country && formState.city ? (
               <option value={formState.city}>{formState.city}</option>
             ) : null}
-            {cityOptions.map((city) => (
-              <option key={city.value} value={city.value}>
-                {city.label}
+            {governorateOptions.map((governorate) => (
+              <option key={governorate.value} value={governorate.value}>
+                {governorate.label}
               </option>
             ))}
           </select>
@@ -347,6 +362,21 @@ export const PostForm = ({
       />
 
       {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
+
+      {isSubmitting && submitProgress !== null ? (
+        <div className="upload-progress" role="status" aria-live="polite">
+          <div className="upload-progress__row">
+            <strong>{submitProgressLabel}</strong>
+            <span>{submitProgress}%</span>
+          </div>
+          <div className="upload-progress__track" aria-hidden="true">
+            <span
+              className="upload-progress__fill"
+              style={{ width: `${submitProgress}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="form-actions">
         <button type="submit" className="button" disabled={isSubmitting}>

@@ -2,95 +2,81 @@ let locationStorePromise;
 
 const countryDisplayCache = new Map();
 const countryOptionsCache = new Map();
-const cityOptionsCache = new Map();
+const governorateOptionsCache = new Map();
 
-const arabicCityOverrides = new Map([
-  ['damascus', 'دمشق'],
-  ['aleppo', 'حلب'],
-  ['homs', 'حمص'],
-  ['hama', 'حماة'],
-  ['latakia', 'اللاذقية'],
-  ['tartus', 'طرطوس'],
-  ['deir ez-zor', 'دير الزور'],
-  ['deir ezzor', 'دير الزور'],
-  ['raqqa', 'الرقة'],
-  ['al hasakah', 'الحسكة'],
-  ['hasakah', 'الحسكة'],
-  ['daraa', 'درعا'],
-  ['as suwayda', 'السويداء'],
-  ['suwayda', 'السويداء'],
-  ['idlib', 'إدلب'],
-  ['qamishli', 'القامشلي'],
-  ['jaramana', 'جرمانا'],
-  ['amman', 'عمان'],
-  ['zarqa', 'الزرقاء'],
-  ['irbid', 'إربد'],
-  ['aqaba', 'العقبة'],
-  ['mafraq', 'المفرق'],
-  ['salt', 'السلط'],
-  ['madaba', 'مادبا'],
-  ['jerash', 'جرش'],
-  ['karak', 'الكرك'],
-  ['tafilah', 'الطفيلة'],
-  ['maan', 'معان'],
-  ['riyadh', 'الرياض'],
-  ['jeddah', 'جدة'],
-  ['mecca', 'مكة'],
-  ['makkah', 'مكة'],
-  ['medina', 'المدينة'],
-  ['madinah', 'المدينة'],
-  ['dammam', 'الدمام'],
-  ['khobar', 'الخبر'],
-  ['taif', 'الطائف'],
-  ['abha', 'أبها'],
-  ['tabuk', 'تبوك'],
-  ['hail', 'حائل'],
+const arabicGovernorateOverrides = new Map([
+  ['al-hasakah governorate', 'محافظة الحسكة'],
+  ['al-raqqah governorate', 'محافظة الرقة'],
+  ['aleppo governorate', 'محافظة حلب'],
+  ['as-suwayda governorate', 'محافظة السويداء'],
+  ['damascus governorate', 'محافظة دمشق'],
+  ['daraa governorate', 'محافظة درعا'],
+  ['deir ez-zor governorate', 'محافظة دير الزور'],
+  ['hama governorate', 'محافظة حماة'],
+  ['homs governorate', 'محافظة حمص'],
+  ['idlib governorate', 'محافظة إدلب'],
+  ['latakia governorate', 'محافظة اللاذقية'],
+  ['quneitra governorate', 'محافظة القنيطرة'],
+  ['rif dimashq governorate', 'محافظة ريف دمشق'],
+  ['tartus governorate', 'محافظة طرطوس'],
+  ['ajloun governorate', 'محافظة عجلون'],
+  ['amman governorate', 'محافظة عمّان'],
+  ['aqaba governorate', 'محافظة العقبة'],
+  ['balqa governorate', 'محافظة البلقاء'],
+  ['irbid governorate', 'محافظة إربد'],
+  ['jerash governorate', 'محافظة جرش'],
+  ['karak governorate', 'محافظة الكرك'],
+  ["ma'an governorate", 'محافظة معان'],
+  ['madaba governorate', 'محافظة مادبا'],
+  ['mafraq governorate', 'محافظة المفرق'],
+  ['tafilah governorate', 'محافظة الطفيلة'],
+  ['zarqa governorate', 'محافظة الزرقاء'],
+  ["'asir", 'عسير'],
+  ['al bahah', 'الباحة'],
+  ['al jawf', 'الجوف'],
+  ['al madinah', 'المدينة المنورة'],
+  ['al-qassim', 'القصيم'],
+  ['eastern province', 'المنطقة الشرقية'],
+  ["ha'il", 'حائل'],
+  ['jizan', 'جازان'],
+  ['makkah', 'مكة المكرمة'],
   ['najran', 'نجران'],
-  ['buraidah', 'بريدة'],
-  ['yanbu', 'ينبع'],
-  ['khamis mushait', 'خميس مشيط'],
-  ['cairo', 'القاهرة'],
-  ['alexandria', 'الإسكندرية'],
-  ['giza', 'الجيزة'],
+  ['northern borders', 'الحدود الشمالية'],
+  ['riyadh', 'الرياض'],
+  ['tabuk', 'تبوك'],
+  ['amman', 'عمّان'],
+  ['beirut governorate', 'محافظة بيروت'],
+  ['mount lebanon governorate', 'محافظة جبل لبنان'],
   ['dubai', 'دبي'],
   ['abu dhabi', 'أبوظبي'],
   ['sharjah', 'الشارقة'],
-  ['ajman', 'عجمان'],
-  ['al ain', 'العين'],
   ['doha', 'الدوحة'],
-  ['kuwait city', 'مدينة الكويت'],
-  ['manama', 'المنامة'],
-  ['beirut', 'بيروت'],
-  ['tripoli', 'طرابلس'],
-  ['sidon', 'صيدا'],
-  ['tyre', 'صور'],
-  ['nablus', 'نابلس'],
-  ['ramallah', 'رام الله'],
-  ['jerusalem', 'القدس'],
-  ['gaza', 'غزة'],
-  ['istanbul', 'إسطنبول'],
-  ['ankara', 'أنقرة'],
-  ['izmir', 'إزمير']
+  ['cairo governorate', 'محافظة القاهرة'],
+  ['alexandria governorate', 'محافظة الإسكندرية']
 ]);
 
 const arabicWordOverrides = new Map([
-  ['district', 'منطقة'],
   ['governorate', 'محافظة'],
-  ['province', 'مقاطعة'],
+  ['province', 'منطقة'],
+  ['region', 'منطقة'],
+  ['district', 'منطقة'],
+  ['state', 'ولاية'],
   ['county', 'مقاطعة'],
-  ['municipality', 'بلدية'],
-  ['city', 'مدينة'],
-  ['town', 'بلدة'],
-  ['village', 'قرية'],
-  ['new', 'الجديدة'],
-  ['old', 'القديمة'],
+  ['territory', 'إقليم'],
   ['north', 'الشمالية'],
   ['south', 'الجنوبية'],
   ['east', 'الشرقية'],
   ['west', 'الغربية'],
   ['central', 'الوسطى'],
   ['upper', 'العليا'],
-  ['lower', 'السفلى']
+  ['lower', 'السفلى'],
+  ['mount', 'جبل'],
+  ['mountain', 'جبل'],
+  ['borders', 'الحدود'],
+  ['eastern', 'الشرقية'],
+  ['western', 'الغربية'],
+  ['northern', 'الشمالية'],
+  ['southern', 'الجنوبية']
 ]);
 
 const transliterationChunks = [
@@ -99,7 +85,6 @@ const transliterationChunks = [
   ['th', 'ث'],
   ['dh', 'ذ'],
   ['gh', 'غ'],
-  ['ch', 'تش'],
   ['ph', 'ف'],
   ['ou', 'و'],
   ['oo', 'و'],
@@ -142,7 +127,7 @@ const normalizeLocationKey = (value) =>
   String(value || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’']/g, '')
+    .replace(/[’']/g, "'")
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
@@ -180,17 +165,17 @@ const transliterateWordToArabic = (word) => {
   return result.replace(/\s+/g, ' ').trim();
 };
 
-const localizeCityLabel = (cityName, language) => {
-  if (language !== 'ar' || !cityName) {
-    return cityName;
+const localizeGovernorateLabel = (name, language) => {
+  if (language !== 'ar' || !name) {
+    return name;
   }
 
-  if (hasArabicCharacters(cityName)) {
-    return cityName;
+  if (hasArabicCharacters(name)) {
+    return name;
   }
 
-  const normalizedKey = normalizeLocationKey(cityName);
-  const directOverride = arabicCityOverrides.get(normalizedKey);
+  const normalizedKey = normalizeLocationKey(name);
+  const directOverride = arabicGovernorateOverrides.get(normalizedKey);
 
   if (directOverride) {
     return directOverride;
@@ -205,24 +190,25 @@ const localizeCityLabel = (cityName, language) => {
 };
 
 const buildLocationStore = async () => {
-  const { City, Country } = await import('country-state-city');
-  const citiesByCountry = new Map();
+  const { Country, State } = await import('country-state-city');
+  const governoratesByCountry = new Map();
 
   Country.getAllCountries().forEach((country) => {
-    const dedupedCities = new Map();
+    const dedupedGovernorates = new Map();
 
-    for (const city of City.getCitiesOfCountry(country.isoCode) || []) {
-      const normalizedKey = normalizeLocationKey(city.name);
+    for (const subdivision of State.getStatesOfCountry(country.isoCode) || []) {
+      const normalizedKey = normalizeLocationKey(subdivision.name);
 
-      if (!dedupedCities.has(normalizedKey)) {
-        dedupedCities.set(normalizedKey, {
-          value: city.name,
-          name: city.name
+      if (!dedupedGovernorates.has(normalizedKey)) {
+        dedupedGovernorates.set(normalizedKey, {
+          value: subdivision.name,
+          name: subdivision.name,
+          code: subdivision.isoCode
         });
       }
     }
 
-    citiesByCountry.set(country.isoCode, [...dedupedCities.values()]);
+    governoratesByCountry.set(country.isoCode, [...dedupedGovernorates.values()]);
   });
 
   return {
@@ -230,7 +216,7 @@ const buildLocationStore = async () => {
       value: country.isoCode,
       name: country.name
     })),
-    citiesByCountry
+    governoratesByCountry
   };
 };
 
@@ -260,25 +246,25 @@ export const getCountryOptions = (locationStore, language = 'en') => {
   return countryOptionsCache.get(cacheKey);
 };
 
-export const getCityOptions = (locationStore, countryCode, language = 'en') => {
+export const getGovernorateOptions = (locationStore, countryCode, language = 'en') => {
   if (!countryCode) {
     return [];
   }
 
   const cacheKey = `${language}:${countryCode}`;
 
-  if (!cityOptionsCache.has(cacheKey)) {
-    const localizedCities = (locationStore.citiesByCountry.get(countryCode) || [])
-      .map((city) => ({
-        value: city.value,
-        label: localizeCityLabel(city.name, language)
+  if (!governorateOptionsCache.has(cacheKey)) {
+    const localizedGovernorates = (locationStore.governoratesByCountry.get(countryCode) || [])
+      .map((governorate) => ({
+        value: governorate.value,
+        label: localizeGovernorateLabel(governorate.name, language)
       }))
       .sort((left, right) => left.label.localeCompare(right.label, language));
 
-    cityOptionsCache.set(cacheKey, localizedCities);
+    governorateOptionsCache.set(cacheKey, localizedGovernorates);
   }
 
-  return cityOptionsCache.get(cacheKey);
+  return governorateOptionsCache.get(cacheKey);
 };
 
 void loadLocationStore();
