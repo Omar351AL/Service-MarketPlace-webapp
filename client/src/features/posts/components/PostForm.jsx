@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { getCityOptions, getCountryOptions } from '../../../lib/utils/locationOptions.js';
+import { createClientId } from '../../../lib/utils/createClientId.js';
+import { getCityOptions, getCountryOptions, loadLocationStore } from '../../../lib/utils/locationOptions.js';
 import { getLocalizedCategoryName, getLocalizedPostStatusLabel } from '../../../lib/utils/marketplaceDisplay.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import { normalizePostPayload, validatePostPayload } from '../utils/postForm.js';
@@ -49,8 +50,7 @@ export const PostForm = ({
   const { language, t } = useI18n();
   const [formState, setFormState] = useState(() => toFormState(initialValues));
   const [localFieldErrors, setLocalFieldErrors] = useState({});
-  const [countryOptions, setCountryOptions] = useState([]);
-  const [cityOptions, setCityOptions] = useState([]);
+  const [locationStore, setLocationStore] = useState(null);
   const [imageItems, setImageItems] = useState(() => createImageItems(initialValues?.images));
   const [removedImageIds, setRemovedImageIds] = useState([]);
   const [coverImageKey, setCoverImageKey] = useState(() => {
@@ -99,30 +99,26 @@ export const PostForm = ({
   useEffect(() => {
     let ignore = false;
 
-    getCountryOptions(language).then((options) => {
+    loadLocationStore().then((store) => {
       if (!ignore) {
-        setCountryOptions(options);
+        setLocationStore(store);
       }
     });
 
     return () => {
       ignore = true;
     };
-  }, [language]);
+  }, []);
 
-  useEffect(() => {
-    let ignore = false;
+  const countryOptions = useMemo(
+    () => (locationStore ? getCountryOptions(locationStore, language) : []),
+    [language, locationStore]
+  );
 
-    getCityOptions(formState.country).then((options) => {
-      if (!ignore) {
-        setCityOptions(options);
-      }
-    });
-
-    return () => {
-      ignore = true;
-    };
-  }, [formState.country]);
+  const cityOptions = useMemo(
+    () => (locationStore ? getCityOptions(locationStore, formState.country, language) : []),
+    [formState.country, language, locationStore]
+  );
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -158,7 +154,7 @@ export const PostForm = ({
       const nextItems = [
         ...current,
         ...files.map((file) => ({
-          key: `new:${crypto.randomUUID()}`,
+          key: `new:${createClientId('img')}`,
           file,
           previewUrl: URL.createObjectURL(file),
           source: 'new',
