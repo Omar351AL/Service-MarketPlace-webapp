@@ -3280,3 +3280,262 @@ html[dir='rtl'] .profile-listings {
     font-size: 1.2rem;
   }
 }
+
+/* =========================
+   Profile page refinements
+========================= */
+
+.profile-hero__avatar-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  border-radius: 30px;
+}
+
+.profile-hero__message-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding-inline: 1.15rem;
+}
+
+.image-lightbox__content--avatar {
+  max-width: min(92vw, 720px);
+  padding: 1rem;
+}
+
+.image-lightbox__image--avatar {
+  border-radius: 24px;
+  object-fit: contain;
+}
+
+/* =========================
+   Smaller cards for profile
+========================= */
+
+.posts-grid--profile {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 280px));
+  justify-content: start;
+  gap: 1rem;
+}
+
+.post-card--profile {
+  max-width: 280px;
+  min-height: unset;
+}
+
+.post-card--profile .post-card__media {
+  aspect-ratio: 1.1 / 0.88;
+}
+
+.post-card--profile .post-card__body {
+  padding: 0.9rem;
+  gap: 0.65rem;
+}
+
+.post-card--profile .post-card__title {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.post-card--profile .post-card__description {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-card--profile .post-card__price {
+  font-size: 1rem;
+}
+
+.post-card--profile .post-card__meta-pill {
+  font-size: 0.8rem;
+}
+
+.post-card--profile .post-card__seller-row {
+  gap: 0.55rem;
+}
+
+.post-card--profile .post-card__chat-button {
+  min-height: 34px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.86rem;
+}
+
+/* =========================
+   Manage listings redesign
+========================= */
+
+.manage-listings-page {
+  gap: 1.25rem;
+}
+
+.manage-listings__hero-panel {
+  padding: 1.25rem;
+  background: linear-gradient(180deg, var(--color-panel) 0%, var(--color-panel-muted) 100%);
+}
+
+.manage-listings__hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.manage-listings__hero-copy {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.manage-listings__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-panel-soft);
+  color: var(--color-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.manage-listings__hero-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 1.15;
+  color: var(--color-heading);
+}
+
+.manage-listings__hero-text {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--color-muted);
+  line-height: 1.8;
+}
+
+.manage-listings__stats {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.manage-listings__stat-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: linear-gradient(180deg, var(--color-panel-soft) 0%, var(--color-panel) 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.manage-listings__stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border: 1px solid var(--color-border);
+}
+
+.manage-listings__stat-value {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-heading);
+}
+
+.manage-listings__primary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.manage-listings__composer {
+  padding: 1.25rem;
+}
+
+.manage-listings__collection {
+  display: grid;
+  gap: 1rem;
+}
+
+.manage-listings__collection-heading {
+  margin-bottom: 0.15rem;
+}
+
+.manage-listings__empty-wrap {
+  padding: 1rem;
+}
+
+.posts-grid--manage {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 320px));
+  justify-content: start;
+  gap: 1rem;
+}
+
+.post-card--manage {
+  max-width: 320px;
+}
+
+.post-card--manage .post-card__media {
+  aspect-ratio: 1.1 / 0.86;
+}
+
+.post-card--manage .post-card__body {
+  padding: 0.95rem;
+  gap: 0.7rem;
+}
+
+.post-card--manage .post-card__title {
+  font-size: 1rem;
+}
+
+.post-card--manage .post-card__description {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 980px) {
+  .manage-listings__hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .posts-grid--profile,
+  .posts-grid--manage {
+    grid-template-columns: 1fr;
+  }
+
+  .post-card--profile,
+  .post-card--manage {
+    max-width: 100%;
+  }
+
+  .manage-listings__hero-panel,
+  .manage-listings__composer {
+    padding: 1rem;
+  }
+
+  .manage-listings__primary-action {
+    width: 100%;
+    justify-content: center;
+  }
+}

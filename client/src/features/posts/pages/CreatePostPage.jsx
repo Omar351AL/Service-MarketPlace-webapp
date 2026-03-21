@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { PlusSquare } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { LayoutGrid, ListChecks, PlusSquare, Sparkles } from 'lucide-react';
 
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog.jsx';
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
@@ -14,6 +14,7 @@ import { PostForm } from '../components/PostForm.jsx';
 export const CreatePostPage = () => {
   const { t } = useI18n();
   const { token } = useAuth();
+
   const [categories, setCategories] = useState([]);
   const [posts, setPosts] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,6 +82,17 @@ export const CreatePostPage = () => {
     };
   }, [token]);
 
+  const postStats = useMemo(() => {
+    const list = posts ?? [];
+    const activeCount = list.filter((post) => post.status === 'ACTIVE').length;
+    const totalCount = list.length;
+
+    return {
+      totalCount,
+      activeCount
+    };
+  }, [posts]);
+
   if (isLoading) {
     return (
       <div className="page-stack">
@@ -118,14 +130,49 @@ export const CreatePostPage = () => {
         }
       />
 
+      <section className="content-card manage-listings__hero-panel">
+        <div className="manage-listings__hero-grid">
+          <div className="manage-listings__hero-copy">
+            <div className="manage-listings__badge">
+              <Sparkles size={16} />
+              <span>{t('posts.manageCollectionTitle')}</span>
+            </div>
+            <h2 className="manage-listings__hero-title">{t('posts.manageCollectionTitle')}</h2>
+            <p className="manage-listings__hero-text">{t('posts.manageCollectionDescription')}</p>
+          </div>
+
+          <div className="manage-listings__stats">
+            <div className="manage-listings__stat-card">
+              <div className="manage-listings__stat-icon">
+                <LayoutGrid size={18} />
+              </div>
+              <div>
+                <span className="eyebrow">{t('posts.myEyebrow')}</span>
+                <strong className="manage-listings__stat-value">{postStats.totalCount}</strong>
+              </div>
+            </div>
+
+            <div className="manage-listings__stat-card">
+              <div className="manage-listings__stat-icon">
+                <ListChecks size={18} />
+              </div>
+              <div>
+                <span className="eyebrow">{t('common.active')}</span>
+                <strong className="manage-listings__stat-value">{postStats.activeCount}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {showCreateForm ? (
         <section className="content-card manage-listings__composer">
           <div className="section-heading">
-          <div>
-            <span className="eyebrow">{t('posts.createEyebrow')}</span>
-            <h2>{t('posts.addNewListing')}</h2>
-            <p>{t('posts.createDescription')}</p>
-          </div>
+            <div>
+              <span className="eyebrow">{t('posts.createEyebrow')}</span>
+              <h2>{t('posts.addNewListing')}</h2>
+              <p>{t('posts.createDescription')}</p>
+            </div>
           </div>
 
           <PostForm
@@ -164,6 +211,7 @@ export const CreatePostPage = () => {
                     }
                   }
                 });
+
                 setPosts((currentPosts) =>
                   currentPosts ? [response.data, ...currentPosts] : [response.data]
                 );
@@ -194,13 +242,12 @@ export const CreatePostPage = () => {
       {actionMessage ? <p className="success-message">{actionMessage}</p> : null}
 
       {posts?.length === 0 ? (
-        <EmptyState
-          title={t('posts.myEmptyTitle')}
-          description={null}
-        />
+        <section className="content-card manage-listings__empty-wrap">
+          <EmptyState title={t('posts.myEmptyTitle')} description={null} />
+        </section>
       ) : (
         <section className="content-card manage-listings__collection">
-          <div className="section-heading">
+          <div className="section-heading manage-listings__collection-heading">
             <div>
               <span className="eyebrow">{t('posts.myEyebrow')}</span>
               <h2>{t('posts.manageCollectionTitle')}</h2>

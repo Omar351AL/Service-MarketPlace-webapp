@@ -1,5 +1,7 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { MessageCircle, X } from 'lucide-react';
 
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog.jsx';
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
@@ -22,6 +24,7 @@ export const UserProfilePage = () => {
   const [isStartingConversation, setIsStartingConversation] = useState(false);
   const [postPendingDelete, setPostPendingDelete] = useState(null);
   const [isDeletingPost, setIsDeletingPost] = useState(false);
+  const [isAvatarLightboxOpen, setIsAvatarLightboxOpen] = useState(false);
 
   useEffect(() => {
     let ignore = false;
@@ -43,6 +46,28 @@ export const UserProfilePage = () => {
       ignore = true;
     };
   }, [token, userId]);
+
+  useEffect(() => {
+    if (!isAvatarLightboxOpen) {
+      return undefined;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setIsAvatarLightboxOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isAvatarLightboxOpen]);
 
   if (!profile && !errorMessage) {
     return (
@@ -102,11 +127,18 @@ export const UserProfilePage = () => {
         <div className="profile-hero__main">
           <div className="profile-hero__avatar-wrap">
             {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={profile.name}
-                className="profile-hero__avatar"
-              />
+              <button
+                type="button"
+                className="profile-hero__avatar-button"
+                onClick={() => setIsAvatarLightboxOpen(true)}
+                aria-label={t('posts.openImageViewer')}
+              >
+                <img
+                  src={avatarUrl}
+                  alt={profile.name}
+                  className="profile-hero__avatar"
+                />
+              </button>
             ) : (
               <div className="profile-hero__avatar-fallback">{initials}</div>
             )}
@@ -135,11 +167,14 @@ export const UserProfilePage = () => {
           ) : (
             <button
               type="button"
-              className="button"
+              className="button profile-hero__message-button"
               onClick={handleStartConversation}
               disabled={isStartingConversation}
             >
-              {isStartingConversation ? t('posts.openingChat') : t('profile.messageUser')}
+              <MessageCircle size={18} />
+              <span>
+                {isStartingConversation ? t('posts.openingChat') : t('profile.messageUser')}
+              </span>
             </button>
           )}
         </div>
@@ -173,10 +208,11 @@ export const UserProfilePage = () => {
             </div>
           </div>
 
-          <div className="posts-grid">
+          <div className="posts-grid posts-grid--profile">
             {profile.posts.map((post) => (
               <PostCard
                 key={post.id}
+                variant="profile"
                 post={{
                   ...post,
                   user: {
@@ -225,6 +261,41 @@ export const UserProfilePage = () => {
           }
         }}
       />
+
+      {isAvatarLightboxOpen && avatarUrl
+        ? createPortal(
+            <div className="image-lightbox" role="presentation">
+              <div
+                className="image-lightbox__backdrop"
+                aria-hidden="true"
+                onClick={() => setIsAvatarLightboxOpen(false)}
+              />
+              <div
+                className="image-lightbox__content image-lightbox__content--avatar"
+                role="dialog"
+                aria-modal="true"
+                aria-label={profile.name}
+                onMouseDown={(event) => event.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className="image-lightbox__close"
+                  onClick={() => setIsAvatarLightboxOpen(false)}
+                  aria-label={t('common.close')}
+                >
+                  <X size={20} />
+                </button>
+
+                <img
+                  src={avatarUrl}
+                  alt={profile.name}
+                  className="image-lightbox__image image-lightbox__image--avatar"
+                />
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 };

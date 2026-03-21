@@ -24,6 +24,8 @@ export const PostCard = ({ post, showActions, onDelete, variant = 'default' }) =
   const shouldShowActions = typeof showActions === 'boolean' ? showActions : isOwner;
   const isBrowseCard = variant === 'browse';
   const isManageCard = variant === 'manage';
+  const isProfileCard = variant === 'profile';
+
   const locationText = getLocalizedPostLocation(post, language, t);
   const locationMeta =
     isBrowseCard && locationText === t('common.locationNotSpecified') ? '' : locationText;
@@ -51,16 +53,26 @@ export const PostCard = ({ post, showActions, onDelete, variant = 'default' }) =
     }
   };
 
+  const articleClassName = [
+    'post-card',
+    isBrowseCard ? 'post-card--browse' : '',
+    isManageCard ? 'post-card--manage' : '',
+    isProfileCard ? 'post-card--profile' : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const metaClassName = [
+    'post-card__meta',
+    isBrowseCard ? 'post-card__meta--browse' : '',
+    isManageCard ? 'post-card__meta--manage' : '',
+    isProfileCard ? 'post-card__meta--profile' : ''
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <article
-      className={
-        isBrowseCard
-          ? 'post-card post-card--browse'
-          : isManageCard
-            ? 'post-card post-card--manage'
-            : 'post-card'
-      }
-    >
+    <article className={articleClassName}>
       <Link to={`/posts/${post.slug}`} className="post-card__media">
         {heroImage ? (
           <img src={resolveApiAssetUrl(heroImage)} alt={post.title} />
@@ -80,15 +92,7 @@ export const PostCard = ({ post, showActions, onDelete, variant = 'default' }) =
           {post.title}
         </Link>
 
-        <div
-          className={
-            isBrowseCard
-              ? 'post-card__meta post-card__meta--browse'
-              : isManageCard
-                ? 'post-card__meta post-card__meta--manage'
-                : 'post-card__meta'
-          }
-        >
+        <div className={metaClassName}>
           <strong className="post-card__price">{formatCurrency(post.price)}</strong>
           {locationMeta ? <span className="post-card__meta-pill">{locationMeta}</span> : null}
         </div>
@@ -109,7 +113,13 @@ export const PostCard = ({ post, showActions, onDelete, variant = 'default' }) =
                 disabled={isStartingChat}
               >
                 <MessageCircle size={16} />
-                <span>{isStartingChat ? (language === 'ar' ? 'جارٍ الفتح...' : 'Opening...') : chatLabel}</span>
+                <span>
+                  {isStartingChat
+                    ? language === 'ar'
+                      ? 'جارٍ الفتح...'
+                      : 'Opening...'
+                    : chatLabel}
+                </span>
               </button>
             ) : null}
           </div>
