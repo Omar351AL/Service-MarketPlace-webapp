@@ -4,8 +4,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ConfirmDialog } from '../../../components/common/ConfirmDialog.jsx';
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { LoadingPanel } from '../../../components/common/LoadingPanel.jsx';
-import { PageIntro } from '../../../components/common/PageIntro.jsx';
-import { api } from '../../../lib/api/client.js';
+import { api, resolveApiAssetUrl } from '../../../lib/api/client.js';
 import { formatDate, formatNumber } from '../../../lib/utils/format.js';
 import { useAuth } from '../../auth/hooks/useAuth.js';
 import { useI18n } from '../../i18n/useI18n.js';
@@ -17,6 +16,7 @@ export const UserProfilePage = () => {
   const location = useLocation();
   const { userId } = useParams();
   const { isAuthenticated, token, user } = useAuth();
+
   const [profile, setProfile] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isStartingConversation, setIsStartingConversation] = useState(false);
@@ -64,6 +64,8 @@ export const UserProfilePage = () => {
   }
 
   const isOwnProfile = user?.id === profile.id;
+  const avatarUrl = profile.avatarUrl ? resolveApiAssetUrl(profile.avatarUrl) : '';
+  const initials = (profile.name || '?').trim().charAt(0).toUpperCase();
 
   const handleStartConversation = async () => {
     if (!isAuthenticated) {
@@ -95,14 +97,31 @@ export const UserProfilePage = () => {
   };
 
   return (
-    <div className="page-stack">
-      <PageIntro
-        eyebrow={t('profile.sellerEyebrow')}
-        title={profile.name}
-        description={profile.bio || t('profile.noBio')}
-        actions={
-          isOwnProfile ? (
-            <div className="profile-hub-actions">
+    <div className="page-stack profile-page">
+      <section className="content-card profile-hero">
+        <div className="profile-hero__main">
+          <div className="profile-hero__avatar-wrap">
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={profile.name}
+                className="profile-hero__avatar"
+              />
+            ) : (
+              <div className="profile-hero__avatar-fallback">{initials}</div>
+            )}
+          </div>
+
+          <div className="profile-hero__content">
+            <span className="eyebrow">{t('profile.sellerEyebrow')}</span>
+            <h1 className="profile-hero__name">{profile.name}</h1>
+            <p className="profile-hero__bio">{profile.bio || t('profile.noBio')}</p>
+          </div>
+        </div>
+
+        <div className="profile-hero__actions">
+          {isOwnProfile ? (
+            <>
               <Link to="/account" className="button button--small button--muted">
                 {t('nav.accountSettings')}
               </Link>
@@ -112,31 +131,30 @@ export const UserProfilePage = () => {
               <Link to="/messages" className="button button--small button--muted">
                 {t('nav.inbox')}
               </Link>
-            </div>
+            </>
           ) : (
             <button
               type="button"
-              className="button button--small"
+              className="button"
               onClick={handleStartConversation}
               disabled={isStartingConversation}
             >
               {isStartingConversation ? t('posts.openingChat') : t('profile.messageUser')}
             </button>
-          )
-        }
-      />
-
-      <section className="content-card profile-summary">
-        <div className="profile-summary__item">
-          <span className="eyebrow">{t('profile.memberSinceLabel')}</span>
-          <div className="profile-summary__pill">
-            <strong>{formatDate(profile.createdAt)}</strong>
-          </div>
+          )}
         </div>
-        <div className="profile-summary__item">
-          <span className="eyebrow">{t('profile.publicPosts')}</span>
-          <div className="profile-summary__pill">
-            <strong>{formatNumber(profile.posts.length)}</strong>
+      </section>
+
+      <section className="content-card profile-stats">
+        <div className="profile-stats__grid">
+          <div className="profile-stat-card">
+            <span className="eyebrow">{t('profile.memberSinceLabel')}</span>
+            <strong className="profile-stat-card__value">{formatDate(profile.createdAt)}</strong>
+          </div>
+
+          <div className="profile-stat-card">
+            <span className="eyebrow">{t('profile.publicPosts')}</span>
+            <strong className="profile-stat-card__value">{formatNumber(profile.posts.length)}</strong>
           </div>
         </div>
       </section>
@@ -147,8 +165,8 @@ export const UserProfilePage = () => {
           description={t('profile.noPublicPostsDescription')}
         />
       ) : (
-        <section className="content-card">
-          <div className="section-heading">
+        <section className="content-card profile-listings">
+          <div className="section-heading profile-listings__heading">
             <div>
               <span className="eyebrow">{t('profile.listingsEyebrow')}</span>
               <h2>{t('profile.listingsTitle')}</h2>
