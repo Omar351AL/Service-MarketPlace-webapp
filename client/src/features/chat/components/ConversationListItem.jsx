@@ -1,3 +1,4 @@
+import { resolveApiAssetUrl } from '../../../lib/api/client.js';
 import { formatConversationTimestamp, formatNumber } from '../../../lib/utils/format.js';
 import { useI18n } from '../../i18n/useI18n.js';
 
@@ -6,6 +7,7 @@ export const ConversationListItem = ({ conversation, isActive, onSelect }) => {
   const participantInitial = conversation.participant.name?.slice(0, 1).toUpperCase() || '?';
   const unreadCount = conversation.unreadCount ?? 0;
   const hasUnread = unreadCount > 0;
+  const participantAvatarUrl = resolveApiAssetUrl(conversation.participant.avatarUrl);
 
   return (
     <button
@@ -20,7 +22,15 @@ export const ConversationListItem = ({ conversation, isActive, onSelect }) => {
       onClick={() => onSelect(conversation.id)}
     >
       <div className="conversation-list-item__identity">
-        <span className="conversation-list-item__avatar">{participantInitial}</span>
+        {participantAvatarUrl ? (
+          <img
+            src={participantAvatarUrl}
+            alt={conversation.participant.name}
+            className="conversation-list-item__avatar-image"
+          />
+        ) : (
+          <span className="conversation-list-item__avatar">{participantInitial}</span>
+        )}
         <div className="conversation-list-item__body">
           <div className="conversation-list-item__header">
             <strong>{conversation.participant.name}</strong>

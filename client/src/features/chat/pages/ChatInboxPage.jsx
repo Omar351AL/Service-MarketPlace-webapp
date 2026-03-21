@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 
 import { EmptyState } from '../../../components/common/EmptyState.jsx';
 import { LoadingPanel } from '../../../components/common/LoadingPanel.jsx';
-import { api } from '../../../lib/api/client.js';
+import { api, resolveApiAssetUrl } from '../../../lib/api/client.js';
 import { formatDateTime } from '../../../lib/utils/format.js';
 import { useAuth } from '../../auth/hooks/useAuth.js';
 import { useI18n } from '../../i18n/useI18n.js';
@@ -55,6 +55,7 @@ export const ChatInboxPage = () => {
   const activeConversationRef = useRef('');
   const messagesViewportRef = useRef(null);
   const composerFormRef = useRef(null);
+  const composerTextareaRef = useRef(null);
   const shouldScrollToLatestRef = useRef(false);
   const stickToBottomRef = useRef(true);
   const pendingScrollTimeoutRef = useRef(null);
@@ -457,6 +458,12 @@ export const ChatInboxPage = () => {
 
       shouldScrollToLatestRef.current = true;
       setDraft('');
+
+      if (isMobileViewport) {
+        requestAnimationFrame(() => {
+          composerTextareaRef.current?.focus({ preventScroll: true });
+        });
+      }
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
@@ -565,11 +572,24 @@ export const ChatInboxPage = () => {
                       ) : null}
 
                       <div className="chat-panel__identity">
-                        <span className="chat-avatar">
-                          {activeConversation.participant.name?.slice(0, 1).toUpperCase() || '?'}
-                        </span>
+                        {activeConversation.participant.avatarUrl ? (
+                          <img
+                            src={resolveApiAssetUrl(activeConversation.participant.avatarUrl)}
+                            alt={activeConversation.participant.name}
+                            className="chat-avatar chat-avatar__image"
+                          />
+                        ) : (
+                          <span className="chat-avatar">
+                            {activeConversation.participant.name?.slice(0, 1).toUpperCase() || '?'}
+                          </span>
+                        )}
                         <div>
-                          <h2>{activeConversation.participant.name}</h2>
+                          <Link
+                            to={`/users/${activeConversation.participant.id}`}
+                            className="chat-panel__participant-link"
+                          >
+                            <h2>{activeConversation.participant.name}</h2>
+                          </Link>
                           <p className="chat-panel__subtitle">
                             {formatDateTime(activeConversation.lastMessageAt || activeConversation.updatedAt)}
                           </p>
@@ -609,6 +629,7 @@ export const ChatInboxPage = () => {
                   <footer className="chat-panel__footer">
                     <form ref={composerFormRef} className="chat-composer" onSubmit={handleSendMessage}>
                       <textarea
+                        ref={composerTextareaRef}
                         rows="3"
                         value={draft}
                         onChange={(event) => setDraft(event.target.value)}
