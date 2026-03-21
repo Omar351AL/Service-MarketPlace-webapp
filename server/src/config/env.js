@@ -14,6 +14,30 @@ const optionalString = z.preprocess(
   z.string().optional()
 );
 
+const optionalBoolean = z.preprocess((value) => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+
+    if (normalized === '') {
+      return undefined;
+    }
+
+    if (['true', '1', 'yes', 'on'].includes(normalized)) {
+      return true;
+    }
+
+    if (['false', '0', 'no', 'off'].includes(normalized)) {
+      return false;
+    }
+  }
+
+  return value;
+}, z.boolean().optional());
+
 const optionalUrl = z.preprocess(
   (value) => {
     if (typeof value !== 'string') {
@@ -37,6 +61,14 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   GOOGLE_CALLBACK_URL: optionalUrl,
+  MAIL_HOST: optionalString,
+  MAIL_PORT: z.coerce.number().int().positive().optional(),
+  MAIL_SECURE: optionalBoolean,
+  MAIL_USER: optionalString,
+  MAIL_PASSWORD: optionalString,
+  MAIL_FROM: optionalString,
+  OTP_EXPIRES_MINUTES: z.coerce.number().int().positive().default(10),
+  PASSWORD_RESET_EXPIRES_MINUTES: z.coerce.number().int().positive().default(10),
   UPLOADS_DIR: z.string().default('server/uploads'),
   UPLOADS_URL_PATH: z
     .string()

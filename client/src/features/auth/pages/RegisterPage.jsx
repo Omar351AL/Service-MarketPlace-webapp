@@ -26,7 +26,7 @@ const getRegisterErrorState = (error, t) => {
     nextFieldErrors.password = t('auth.passwordMinLengthError');
   }
 
-  if (error.status === 409) {
+  if (error.code === 'EMAIL_EXISTS' || error.status === 409) {
     nextFieldErrors.email = t('auth.emailExistsError');
   }
 
@@ -39,6 +39,13 @@ const getRegisterErrorState = (error, t) => {
     };
   }
 
+  if (error.code === 'MAIL_NOT_CONFIGURED') {
+    return {
+      fieldErrors: {},
+      formError: t('auth.mailNotConfigured')
+    };
+  }
+
   return {
     fieldErrors: {},
     formError: t('auth.registerFailed')
@@ -48,7 +55,7 @@ const getRegisterErrorState = (error, t) => {
 export const RegisterPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { register } = useAuth();
   const [formState, setFormState] = useState({
     name: '',
@@ -68,7 +75,7 @@ export const RegisterPage = () => {
       <PageIntro
         eyebrow={t('auth.registerEyebrow')}
         title={t('auth.registerTitle')}
-        description={null}
+        description={t('auth.registerDescription')}
       />
 
       <section className="content-card auth-card">
@@ -81,8 +88,14 @@ export const RegisterPage = () => {
             setFieldErrors({});
 
             try {
-              await register(formState);
-              navigate('/');
+              const response = await register({
+                ...formState,
+                language
+              });
+
+              navigate(`/verify-email?email=${encodeURIComponent(response.email)}`, {
+                replace: true
+              });
             } catch (error) {
               const nextErrorState = getRegisterErrorState(error, t);
               setFieldErrors(nextErrorState.fieldErrors);

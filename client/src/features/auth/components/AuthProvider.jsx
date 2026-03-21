@@ -74,12 +74,8 @@ export const AuthProvider = ({ children }) => {
       },
       register: async (payload) => {
         const response = await api.register(payload);
-        const nextSession = response.data;
-
-        setSession(nextSession);
-        window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(nextSession));
-        setSessionStatus('authenticated');
-        return nextSession;
+        setSessionStatus('guest');
+        return response.data;
       },
       setSession: (nextSession) => {
         setSession(nextSession);

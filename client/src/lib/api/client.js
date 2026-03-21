@@ -36,7 +36,7 @@ const parsePayload = (rawPayload) => {
 const buildApiError = ({ status, payload, fallbackMessage, code }) => {
   const error = new Error(payload?.message || fallbackMessage || `Request failed with status ${status}`);
   error.status = status;
-  error.code = code;
+  error.code = payload?.code || code || null;
   error.payload = payload;
   error.fieldErrors = payload?.errors?.fieldErrors || payload?.details?.fieldErrors || {};
   return error;
@@ -184,6 +184,12 @@ export const resolveApiAssetUrl = (assetPath) => {
 export const api = {
   register: (body) => apiRequest('/auth/register', { method: 'POST', body }),
   login: (body) => apiRequest('/auth/login', { method: 'POST', body }),
+  verifyEmailOtp: (body) => apiRequest('/auth/verify-email', { method: 'POST', body }),
+  resendVerificationOtp: (body) =>
+    apiRequest('/auth/resend-verification', { method: 'POST', body }),
+  requestPasswordResetOtp: (body) =>
+    apiRequest('/auth/forgot-password', { method: 'POST', body }),
+  resetPasswordWithOtp: (body) => apiRequest('/auth/reset-password', { method: 'POST', body }),
   getHealth: () => apiRequest('/health'),
   getCategories: () => apiRequest('/categories'),
   getCurrentUser: (token) => apiRequest('/auth/me', { token }),

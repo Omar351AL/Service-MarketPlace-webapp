@@ -28,12 +28,18 @@ enum ConversationStatus {
   OPEN
 }
 
+enum OtpTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 model User {
   id             String         @id @default(cuid())
   name           String
   email          String         @unique
   passwordHash   String?
   googleId       String?        @unique
+  emailVerifiedAt DateTime?
   avatarUrl      String?
   bio            String?        @db.Text
   role           UserRole       @default(USER)
@@ -44,10 +50,12 @@ model User {
   sentMessages   Message[]      @relation("SentMessages")
   conversationsA Conversation[] @relation("ConversationUserOne")
   conversationsB Conversation[] @relation("ConversationUserTwo")
+  otpTokens      OtpToken[]
 
   @@index([email])
   @@index([role])
   @@index([status])
+  @@index([emailVerifiedAt])
 }
 
 model Category {
@@ -132,5 +140,22 @@ model Message {
 
   @@index([conversationId])
   @@index([senderId])
+  @@index([createdAt])
+}
+
+model OtpToken {
+  id         String       @id @default(cuid())
+  userId      String?
+  email       String
+  codeHash    String
+  type        OtpTokenType
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email, type])
+  @@index([expiresAt])
   @@index([createdAt])
 }

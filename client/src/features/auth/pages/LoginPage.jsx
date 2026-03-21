@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { PageIntro } from '../../../components/common/PageIntro.jsx';
 import { useI18n } from '../../i18n/useI18n.js';
@@ -11,10 +11,24 @@ const normalizeFieldErrors = (fieldErrors = {}) =>
   );
 
 const getLoginErrorState = (error, t) => {
-  if (error.status === 401) {
+  if (error.code === 'INVALID_CREDENTIALS' || error.status === 401) {
     return {
       fieldErrors: {},
       formError: t('auth.invalidCredentials')
+    };
+  }
+
+  if (error.code === 'EMAIL_NOT_VERIFIED') {
+    return {
+      fieldErrors: {},
+      formError: t('auth.emailNotVerified')
+    };
+  }
+
+  if (error.code === 'ACCOUNT_BLOCKED') {
+    return {
+      fieldErrors: {},
+      formError: t('auth.accountBlocked')
     };
   }
 
@@ -35,6 +49,13 @@ const getLoginErrorState = (error, t) => {
     };
   }
 
+  if (error.code === 'MAIL_NOT_CONFIGURED') {
+    return {
+      fieldErrors: {},
+      formError: t('auth.mailNotConfigured')
+    };
+  }
+
   return {
     fieldErrors: {},
     formError: t('auth.loginFailed')
@@ -43,6 +64,7 @@ const getLoginErrorState = (error, t) => {
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { t } = useI18n();
   const { login } = useAuth();
@@ -57,6 +79,8 @@ export const LoginPage = () => {
   const registerUrl = preservedRedirect
     ? `/register?redirect=${encodeURIComponent(preservedRedirect)}`
     : '/register';
+  const forgotPasswordUrl = '/forgot-password';
+  const successMessage = location.state?.message || '';
 
   return (
     <div className="page-stack auth-page">
@@ -67,6 +91,8 @@ export const LoginPage = () => {
       />
 
       <section className="content-card auth-card">
+        {successMessage ? <p className="success-message">{successMessage}</p> : null}
+
         <form
           className="editor-form"
           onSubmit={async (event) => {
@@ -113,7 +139,25 @@ export const LoginPage = () => {
             {fieldErrors.password ? <span className="field-error">{fieldErrors.password}</span> : null}
           </label>
 
-          {errorMessage ? <p className="error-message">{errorMessage}</p> : null}
+          <div className="auth-secondary-link-row">
+            <Link to={forgotPasswordUrl} className="ghost-link">
+              {t('auth.forgotPassword')}
+            </Link>
+          </div>
+
+          {errorMessage ? (
+            <div className="auth-feedback-stack">
+              <p className="error-message">{errorMessage}</p>
+              {errorMessage === t('auth.emailNotVerified') && formState.email ? (
+                <Link
+                  to={`/verify-email?email=${encodeURIComponent(formState.email)}`}
+                  className="ghost-link"
+                >
+                  {t('auth.goToVerification')}
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="form-actions">
             <button type="submit" className="button" disabled={isSubmitting}>

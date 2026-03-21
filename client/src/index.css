@@ -3539,3 +3539,17 @@ html[dir='rtl'] .profile-listings {
     justify-content: center;
   }
 }
+
+/* =========================
+   Auth OTP flows
+========================= */
+
+.auth-secondary-link-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.auth-feedback-stack {
+  display: grid;
+  gap: 0.4rem;
+}

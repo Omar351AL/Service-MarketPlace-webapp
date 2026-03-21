@@ -6,6 +6,7 @@ const authUserSelect = {
   id: true,
   name: true,
   email: true,
+  emailVerifiedAt: true,
   role: true,
   status: true,
   avatarUrl: true,
