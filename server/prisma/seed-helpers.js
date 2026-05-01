@@ -312,23 +312,24 @@ export const ensureAdminUser = async (prisma) => {
     return null;
   }
 
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: adminEmail }
-  });
-
-  if (existingAdmin) {
-    return existingAdmin;
-  }
-
   const passwordHash = await bcrypt.hash(process.env.SEED_ADMIN_PASSWORD, 10);
 
-  return prisma.user.create({
-    data: {
+  return prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {
+      name: process.env.SEED_ADMIN_NAME?.trim() || 'Local Admin',
+      passwordHash,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+      emailVerifiedAt: new Date()
+    },
+    create: {
       name: process.env.SEED_ADMIN_NAME?.trim() || 'Local Admin',
       email: adminEmail,
       passwordHash,
       role: 'ADMIN',
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      emailVerifiedAt: new Date()
     }
   });
 };
@@ -392,7 +393,8 @@ export const seedArabicMarketplace = async (prisma) => {
       bio: user.bio,
       passwordHash,
       role: 'USER',
-      status: 'ACTIVE'
+      status: 'ACTIVE',
+      emailVerifiedAt: new Date()
     }))
   });
 

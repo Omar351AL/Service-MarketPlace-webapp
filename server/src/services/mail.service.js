@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 
-import { env } from '../config/env.js';
+import { env, isProduction } from '../config/env.js';
 import { ApiError } from '../utils/ApiError.js';
 
 let transporterPromise = null;
@@ -89,7 +89,6 @@ const buildOtpEmailContent = ({ language, name, code, minutes, type }) => {
 };
 
 export const sendOtpEmail = async ({ email, language = 'en', name, code, minutes, type }) => {
-  const transporter = await getTransporter();
   const content = buildOtpEmailContent({
     language,
     name,
@@ -98,11 +97,34 @@ export const sendOtpEmail = async ({ email, language = 'en', name, code, minutes
     type
   });
 
-  await transporter.sendMail({
-    from: env.MAIL_FROM,
-    to: email,
-    subject: content.subject,
-    text: content.text,
-    html: content.html
-  });
+  try {
+    const transporter = await getTransporter();
+
+    await transporter.sendMail({
+      from: env.MAIL_FROM,
+      to: email,
+      subject: content.subject,
+      text: content.text,
+      html: content.html
+    });
+  } catch (error) {
+    if (isProduction) {
+      throw error;
+    }
+
+    console.warn('[dev-mail-fallback] SMTP delivery failed. OTP logged locally instead.');
+    console.warn(
+      JSON.stringify(
+        {
+          email,
+          type,
+          code,
+          expiresInMinutes: minutes,
+          subject: content.subject
+        },
+        null,
+        2
+      )
+    );
+  }
 };
